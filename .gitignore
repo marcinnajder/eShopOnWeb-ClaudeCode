@@ -260,3 +260,6 @@ pub/
 .devcontainer
 
 .azure
+
+# Local SQLite database files (UseSqliteDatabase=true)
+.data/

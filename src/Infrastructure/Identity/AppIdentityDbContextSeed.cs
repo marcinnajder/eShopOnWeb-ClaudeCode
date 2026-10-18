@@ -16,6 +16,11 @@ public class AppIdentityDbContextSeed
         {
             identityDbContext.Database.Migrate();
         }
+        else if (identityDbContext.Database.IsSqlite())
+        {
+            // Migrations target SQL Server, so SQLite gets the schema straight from the model
+            identityDbContext.Database.EnsureCreated();
+        }
 
         await roleManager.CreateAsync(new IdentityRole(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS));
         await roleManager.CreateAsync(new IdentityRole(BlazorShared.Authorization.Constants.Roles.PRODUCT_MANAGERS));

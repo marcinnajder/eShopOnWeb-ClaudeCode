@@ -123,6 +123,26 @@ To use the sample with a persistent database, you will need to run its Entity Fr
 
 You can also run the samples in Docker (see below).
 
+### Running the sample with SQLite
+
+To keep data between restarts without installing a database server, set `UseSqliteDatabase=true` for both applications. Web and PublicApi then share SQLite database files in the `.data` folder at the repository root (configured by the `SqliteCatalogConnection` and `SqliteIdentityConnection` connection strings; relative paths are resolved against each project folder).
+
+Web creates and seeds the database on first start, so start Web first and PublicApi second (each in its own terminal, from the repository root):
+
+```bash
+# macOS / Linux / Git Bash
+UseSqliteDatabase=true dotnet run --project src/Web --launch-profile https
+UseSqliteDatabase=true dotnet run --project src/PublicApi --launch-profile https
+```
+
+```powershell
+# Windows PowerShell
+$env:UseSqliteDatabase="true"; dotnet run --project src/Web --launch-profile https
+$env:UseSqliteDatabase="true"; dotnet run --project src/PublicApi --launch-profile https
+```
+
+`UseSqliteDatabase` takes precedence over `UseOnlyInMemoryDatabase`. Delete the `.data` folder to start again with fresh sample data.
+
 ### Configuring the sample to use SQL Server
 
 1. By default, the project uses a real database. If you want an in memory database, you can add in the `appsettings.json` file in the Web folder
