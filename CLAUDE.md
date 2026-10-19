@@ -51,7 +51,7 @@ Package versions are managed centrally in `Directory.Packages.props`.
 
 - English for everything that lands in the repo or on GitHub: code, comments, commit messages, branch names, issues, PRs and review comments. Chat with the user may be in Polish.
 - Task branch: `feature/<issue-number>-<short-slug>` (e.g. `feature/12-product-search`), created from `main` and linked to the issue (`gh issue develop`).
-- Issue body has two sections: `Requirements` and `Implementation plan`.
+- Issue body has two sections: `Requirements` (problem, goal, acceptance criteria – written when the issue is created) and `Implementation plan` (left as "To be defined" when the issue is created; filled in only after the developer has discussed and approved the plan).
 - PR title starts with the issue number (e.g. `#12 Add product search`); the description contains a summary of changes, how to test, and `Closes #<issue-number>`.
 - Before committing, the build and tests must pass.
 - Never commit, push, or publish anything on GitHub (issues, PRs, comments) unless the user asks for it.
