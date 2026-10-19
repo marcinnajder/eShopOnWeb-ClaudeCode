@@ -23,7 +23,7 @@ public static class Dependencies
             useOnlyInMemoryDatabase = bool.Parse(configuration["UseOnlyInMemoryDatabase"]!);
         }
 
-        // SQLite takes precedence over in-memory, because Web enables in-memory in its appsettings.json
+        // SQLite takes precedence over in-memory, so it can be switched on without touching the in-memory setting
         if (configuration.GetValue<bool>(USE_SQLITE_DATABASE_CONFIG_NAME))
         {
             string catalogConnectionString = GetSqliteConnectionString(configuration, "SqliteCatalogConnection");
