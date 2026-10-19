@@ -123,6 +123,33 @@ To use the sample with a persistent database, you will need to run its Entity Fr
 
 You can also run the samples in Docker (see below).
 
+### Running the sample with SQLite
+
+For local development (the `Development` environment, used by the `https` launch profile) both applications store data in SQLite database files shared by Web and PublicApi, so data survives restarts without installing a database server. The files live in the `.data` folder at the repository root (configured by the `SqliteCatalogConnection` and `SqliteIdentityConnection` connection strings in `appsettings.json`; relative paths are resolved against each project folder). Other environments (Docker, production) keep using SQL Server.
+
+The database mode is selected with two settings, `UseSqliteDatabase` and `UseOnlyInMemoryDatabase` (`UseSqliteDatabase` takes precedence). You can set them in two ways:
+
+1. **Configuration files** (used by default) – SQLite is enabled for the `Development` environment in both:
+   - `src/Web/appsettings.Development.json`
+   - `src/PublicApi/appsettings.Development.json`
+
+   ```json
+   {
+     "UseSqliteDatabase": true
+   }
+   ```
+
+2. **Environment variables** – override the files without editing them, e.g. to switch to the in-memory database: `UseSqliteDatabase=false UseOnlyInMemoryDatabase=true dotnet run ...` (PowerShell: `$env:UseSqliteDatabase="false"; $env:UseOnlyInMemoryDatabase="true"; dotnet run ...`).
+
+Web creates and seeds the database on first start, so start Web first and PublicApi second (each in its own terminal, from the repository root):
+
+```bash
+dotnet run --project src/Web --launch-profile https
+dotnet run --project src/PublicApi --launch-profile https
+```
+
+Delete the `.data` folder to start again with fresh sample data. Tests always use in-memory databases.
+
 ### Configuring the sample to use SQL Server
 
 1. By default, the project uses a real database. If you want an in memory database, you can add in the `appsettings.json` file in the Web folder

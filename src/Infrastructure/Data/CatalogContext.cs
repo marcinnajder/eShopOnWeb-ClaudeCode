@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
@@ -23,5 +24,15 @@ public class CatalogContext : DbContext
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        if (Database.IsSqlite())
+        {
+            // The HiLo key generation used for SQL Server relies on sequences, which SQLite does not support;
+            // without them SQLite falls back to auto-increment keys
+            foreach (var sequence in builder.Model.GetSequences().ToList())
+            {
+                builder.Model.RemoveSequence(sequence.Name, sequence.Schema);
+            }
+        }
     }
 }

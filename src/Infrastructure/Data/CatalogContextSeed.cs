@@ -20,6 +20,11 @@ public class CatalogContextSeed
             {
                 catalogContext.Database.Migrate();
             }
+            else if (catalogContext.Database.IsSqlite())
+            {
+                // Migrations target SQL Server, so SQLite gets the schema straight from the model
+                catalogContext.Database.EnsureCreated();
+            }
 
             if (!await catalogContext.CatalogBrands.AnyAsync())
             {

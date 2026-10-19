@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.IO;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +13,8 @@ namespace Microsoft.eShopWeb.Infrastructure;
 
 public static class Dependencies
 {
+    public const string USE_SQLITE_DATABASE_CONFIG_NAME = "UseSqliteDatabase";
+
     public static void ConfigureLocalDatabaseContexts(this IServiceCollection services, IConfiguration configuration)
     {
         bool useOnlyInMemoryDatabase = false;
@@ -19,7 +23,20 @@ public static class Dependencies
             useOnlyInMemoryDatabase = bool.Parse(configuration["UseOnlyInMemoryDatabase"]!);
         }
 
-        if (useOnlyInMemoryDatabase)
+        // SQLite takes precedence over in-memory, so it can be switched on without touching the in-memory setting
+        if (configuration.GetValue<bool>(USE_SQLITE_DATABASE_CONFIG_NAME))
+        {
+            string catalogConnectionString = GetSqliteConnectionString(configuration, "SqliteCatalogConnection");
+            services.AddDbContext<CatalogContext>((provider, options) =>
+                options.UseSqlite(catalogConnectionString)
+                    .AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>()));
+
+            string identityConnectionString = GetSqliteConnectionString(configuration, "SqliteIdentityConnection");
+            services.AddDbContext<AppIdentityDbContext>((provider, options) =>
+                options.UseSqlite(identityConnectionString)
+                    .AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>()));
+        }
+        else if (useOnlyInMemoryDatabase)
         {
             services.AddDbContext<CatalogContext>((provider, options) =>
                options.UseInMemoryDatabase("Catalog"));
@@ -53,6 +70,19 @@ public static class Dependencies
                 options.AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
             });
         }
+    }
+
+    /// <summary>
+    /// Resolves a relative SQLite file path against the content root (the project folder), so Web and PublicApi
+    /// share the same database file no matter which directory they are started from.
+    /// </summary>
+    private static string GetSqliteConnectionString(IConfiguration configuration, string name)
+    {
+        var builder = new SqliteConnectionStringBuilder(configuration.GetConnectionString(name));
+        string contentRoot = configuration[HostDefaults.ContentRootKey] ?? Directory.GetCurrentDirectory();
+        builder.DataSource = Path.GetFullPath(builder.DataSource, contentRoot);
+        Directory.CreateDirectory(Path.GetDirectoryName(builder.DataSource)!);
+        return builder.ToString();
     }
 
     public static void AddJwtSettings(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
