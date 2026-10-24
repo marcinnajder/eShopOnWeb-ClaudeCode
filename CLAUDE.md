@@ -17,7 +17,7 @@ dotnet format eShopOnWeb.slnx --verify-no-changes
 ```
 
 - Test projects use xUnit v3, except `PublicApiIntegrationTests` (MSTest). All of them run on in-memory databases.
-- `tests/EndToEndTests` (Playwright) needs browsers installed first (see its README); skip it otherwise. `dotnet ./BuildTestFormat.cs` runs restore, build, all `*Tests` projects (including E2E) and format check.
+- `dotnet ./BuildTestFormat.cs` runs restore, build, all `*Tests` projects and the format check in one go.
 
 ## Running the app
 
